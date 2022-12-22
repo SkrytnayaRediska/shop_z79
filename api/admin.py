@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.contrib import admin
 from .models import Category, Cashback, ProductItem, \
-    Producer, Promocode, RegistredUser, Discount, Order
+    Producer, Promocode, RegistredUser, Discount, Order, Basket
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -56,6 +56,7 @@ admin.site.register(Order, OrderAdmin)
 admin.site.register(Cashback, CashbackAdmin)
 admin.site.register(Producer, ProducerAdmin)
 admin.site.register(RegistredUser, RegistredUserAdmin)
+admin.site.register(Basket)
 
 
 

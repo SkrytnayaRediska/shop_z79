@@ -5,11 +5,12 @@ from django.shortcuts import render, get_list_or_404
 from django.contrib.sites.shortcuts import get_current_site
 from .models import Category, Producer, Promocode, Discount, ProductItem, RegistredUser
 from .serializers import CategorySerializer, DiscountSerializer, PromocodeSerializer, \
-    ProducerSerializer, ProductItemSerializer, RegistrationSerializer
+    ProducerSerializer, ProductItemSerializer, RegistrationSerializer, LoginSerializer, BasketSerializer
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.db.models import F
 
 
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -69,7 +70,7 @@ class ProducerProductView(APIView):
 
 
 class DiscountProductsView(APIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, discount_id):
         products = ProductItem.objects.filter(discount__id=discount_id)
@@ -121,6 +122,33 @@ class ActivateAccountView(APIView):
             user.save()
             return Response("Thank you for email confirmation!")
         return Response("Something Wrong with your account", status=403)
+
+
+class LoginView(APIView):
+    permission_classes = (AllowAny, )
+    serializer_class = LoginSerializer
+
+    def post(self, request):
+        user = request.data.get("user", {})
+        serializer = self.serializer_class(data=user)
+        serializer.is_valid(raise_exception=True)
+
+        return Response(serializer.data)
+
+
+class BasketView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        user = request.user
+        basket = ProductItem.objects.prefetch_related("basket_set").filter(basket__user=user) \
+            .values("name", "price", "discount", number_of_items=F("basket__number_of_items"),
+                    discount_percent=F("discount__percent"), discount_expire_date=F("discount__expire_date"))
+        serializer = BasketSerializer({"products": basket})
+
+        return Response(serializer.data)
+
+
 
 
 

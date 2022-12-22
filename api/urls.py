@@ -1,7 +1,7 @@
 from django.urls import re_path, path
 from .views import CategoriesListView, DiscountsListView, ProducersListView, \
     ProductItemsListView, PromocodesListView, CategoryProductsView, ProducerProductView, \
-    DiscountProductsView, RegistrationView, ActivateAccountView
+    DiscountProductsView, RegistrationView, ActivateAccountView, LoginView, BasketView
 
 urlpatterns = [
     re_path(r'^categories-all', CategoriesListView.as_view(), name='categories-all'),
@@ -13,6 +13,9 @@ urlpatterns = [
     path('producer/<int:producer_id>/', ProducerProductView.as_view()),
     path('discount/<int:discount_id>/', DiscountProductsView.as_view()),
     re_path(r'^register/', RegistrationView.as_view()),
+    re_path(r'^login/', LoginView.as_view()),
+    re_path(r'^basket/', BasketView.as_view()),
+
     path('activate/<slug:uidb64>/<slug:token>/', ActivateAccountView.as_view(), name='activate')
 
 ]
