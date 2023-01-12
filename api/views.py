@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render, get_list_or_404
+from django.shortcuts import render, get_list_or_404, get_object_or_404
 from django.contrib.sites.shortcuts import get_current_site
-from .models import Category, Producer, Promocode, Discount, ProductItem, RegistredUser
+from .models import Category, Producer, Promocode, Discount, ProductItem, RegistredUser, Basket
 from .serializers import CategorySerializer, DiscountSerializer, PromocodeSerializer, \
-    ProducerSerializer, ProductItemSerializer, RegistrationSerializer, LoginSerializer, BasketSerializer
+    ProducerSerializer, ProductItemSerializer, RegistrationSerializer, LoginSerializer, BasketSerializer, \
+    AddProductsSerializer, DeleteProductSerializer, OrderSerializer
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -147,6 +148,54 @@ class BasketView(APIView):
         serializer = BasketSerializer({"products": basket})
 
         return Response(serializer.data)
+
+    def post(self, request):
+        input_serializer = AddProductsSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+
+        product = get_object_or_404(ProductItem, id=input_serializer.data.get('product_id'))
+
+        if product.count_on_stock >= input_serializer.data.get('number_of_items'):
+            object, created = Basket.objects.get_or_create(user=request.user, product=product)
+            is_deleted = False
+
+            if object.number_of_items:
+                object.number_of_items += input_serializer.data.get('number_of_items')
+
+                if object.number_of_items <= 0:
+                    is_deleted = True
+                    object.delete()
+            else:
+                object.number_of_items = input_serializer.data.get('number_of_items')
+
+            if not is_deleted:
+                object.save()
+
+            return Response(status=200)
+
+        return Response("Not enough products on a stock", status=409)
+
+    def delete(self, request):
+        input_serializer = DeleteProductSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+
+        product = get_object_or_404(ProductItem, id=input_serializer.data.get('product_id'))
+        Basket.objects.get(user=request.user, product=product).delete()
+
+        return Response(status=200)
+
+
+class CreateOrderView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def post(self, request):
+        input_serializer = OrderSerializer(data=request.data, context={'request': request})
+        input_serializer.is_valid(raise_exception=True)
+
+        order = input_serializer.save()
+
+        return Response(input_serializer.data)
+
 
 
 

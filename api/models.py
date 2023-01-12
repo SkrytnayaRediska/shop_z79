@@ -163,7 +163,7 @@ class RegistredUser(AbstractUser):
 class Basket(models.Model):
     user = models.ForeignKey(RegistredUser, on_delete=models.CASCADE)
     product = models.ForeignKey(ProductItem, on_delete=models.CASCADE)
-    number_of_items = models.PositiveIntegerField()
+    number_of_items = models.PositiveIntegerField(default=None, null=True)
 
 
 class Order(models.Model):
