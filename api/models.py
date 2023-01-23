@@ -198,8 +198,11 @@ class Order(models.Model):
     delivery_notif_sent = models.BooleanField()
 
 
-
-
+class Comment(models.Model):
+    user = models.ForeignKey(RegistredUser, on_delete=models.DO_NOTHING)
+    product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 

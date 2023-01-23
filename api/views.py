@@ -6,7 +6,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from .models import Category, Producer, Promocode, Discount, ProductItem, RegistredUser, Basket
 from .serializers import CategorySerializer, DiscountSerializer, PromocodeSerializer, \
     ProducerSerializer, ProductItemSerializer, RegistrationSerializer, LoginSerializer, BasketSerializer, \
-    AddProductsSerializer, DeleteProductSerializer, OrderSerializer
+    AddProductsSerializer, DeleteProductSerializer, OrderSerializer, ProductItemDetailSerializer
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -20,6 +20,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.core.mail import send_mail
+from drf_yasg.utils import swagger_auto_schema
 
 
 class CategoriesListView(ListAPIView):
@@ -50,6 +51,21 @@ class ProductItemsListView(ListAPIView):
     queryset = ProductItem.objects.all()
     serializer_class = ProductItemSerializer
     permission_classes = (AllowAny, )
+
+
+class SingleProductItemView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, product_id):
+        queryset = ProductItem.objects.prefetch_related('comment_set').filter(id=product_id).values(
+            "id", "name", "description", "articul", "price", "count_on_stock", producer_name=F("producer__name"),
+            category_name=F("category__name"),
+            discount_name=F("discount__name"), discount_percent=F("discount__percent"),
+            comment_text=F("comment__comment"), comment_author=F("comment__user__email")
+        ).first()
+        print(queryset)
+        serializer = ProductItemDetailSerializer(queryset)
+        return Response(serializer.data)
 
 
 class CategoryProductsView(APIView):
@@ -97,9 +113,18 @@ class RegistrationView(APIView):
         send_mail(mail_subject, message, recipient_list=[to_email],
                   from_email=settings.EMAIL_HOST_USER)
 
-
+    @swagger_auto_schema(
+        request_body=RegistrationSerializer,
+        request_method='POST',
+        responses={
+            200: RegistrationSerializer
+        }
+    )
     def post(self, request):
-        user = request.data.get('user')
+        """
+        create non-active account and send activation mail
+        """
+        user = request.data
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -129,8 +154,15 @@ class LoginView(APIView):
     permission_classes = (AllowAny, )
     serializer_class = LoginSerializer
 
+    @swagger_auto_schema(
+        request_body=LoginSerializer,
+        request_method='POST',
+        responses={
+            200: LoginSerializer
+        }
+    )
     def post(self, request):
-        user = request.data.get("user", {})
+        user = request.data
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
 
@@ -140,6 +172,13 @@ class LoginView(APIView):
 class BasketView(APIView):
     permission_classes = (IsAuthenticated, )
 
+
+    @swagger_auto_schema(
+        request_method='GET',
+        responses={
+            200: BasketSerializer
+        }
+    )
     def get(self, request):
         user = request.user
         basket = ProductItem.objects.prefetch_related("basket_set").filter(basket__user=user) \
@@ -149,6 +188,14 @@ class BasketView(APIView):
 
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        request_body=AddProductsSerializer,
+        request_method='POST',
+        responses={
+            200: "",
+            409: "Not enough products on a stock"
+        }
+    )
     def post(self, request):
         input_serializer = AddProductsSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
@@ -175,6 +222,14 @@ class BasketView(APIView):
 
         return Response("Not enough products on a stock", status=409)
 
+
+    @swagger_auto_schema(
+        request_body=DeleteProductSerializer,
+        request_method='DELETE',
+        responses={
+            200: ""
+        }
+    )
     def delete(self, request):
         input_serializer = DeleteProductSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
@@ -188,6 +243,13 @@ class BasketView(APIView):
 class CreateOrderView(APIView):
     permission_classes = (IsAuthenticated, )
 
+    @swagger_auto_schema(
+        request_body=OrderSerializer,
+        request_method='POST',
+        responses={
+            200: OrderSerializer
+        }
+    )
     def post(self, request):
         input_serializer = OrderSerializer(data=request.data, context={'request': request})
         input_serializer.is_valid(raise_exception=True)
