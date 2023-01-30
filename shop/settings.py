@@ -34,9 +34,15 @@ ALLOWED_HOSTS = []
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = "olga@arusnavi.ru"
-EMAIL_HOST_PASSWORD = "******"
+EMAIL_HOST_PASSWORD = "*****"
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
+
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_IMPORTS = [
+    "api.tasks"
+]
 
 
 
@@ -49,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
     'rest_framework',
     'api',
 ]

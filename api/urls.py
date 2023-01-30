@@ -2,7 +2,7 @@ from django.urls import re_path, path
 from .views import CategoriesListView, DiscountsListView, ProducersListView, \
     ProductItemsListView, PromocodesListView, CategoryProductsView, ProducerProductView, \
     DiscountProductsView, RegistrationView, ActivateAccountView, LoginView, BasketView, CreateOrderView, \
-    SingleProductItemView
+    SingleProductItemView, GetStatisticView
 
 urlpatterns = [
     re_path(r'^categories-all', CategoriesListView.as_view(), name='categories-all'),
@@ -20,6 +20,7 @@ urlpatterns = [
     re_path(r'^login/', LoginView.as_view()),
     re_path(r'^basket/', BasketView.as_view()),
     re_path(r'^create-order/', CreateOrderView.as_view()),
+    re_path(r'^get-statistic/', GetStatisticView.as_view()),
 
     path('activate/<slug:uidb64>/<slug:token>/', ActivateAccountView.as_view(), name='activate')
 

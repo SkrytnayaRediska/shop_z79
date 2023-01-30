@@ -17,10 +17,18 @@ from django.db.models import F
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
-from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.core.mail import send_mail
 from drf_yasg.utils import swagger_auto_schema
+from .tasks import send_activation_mail, get_products_statistic
+
+
+class GetStatisticView(APIView):
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        get_products_statistic.delay()
+        return Response(status=200)
 
 
 class CategoriesListView(ListAPIView):
@@ -99,20 +107,6 @@ class RegistrationView(APIView):
     permission_classes = (AllowAny, )
     serializer_class = RegistrationSerializer
 
-    def send_mail(self, user_id, domain):
-        user = RegistredUser.objects.get(id=user_id)
-        mail_subject = "ACTIVATION LINK"
-        message = render_to_string('account_activation_email.html',
-                                   {
-                                       "user": user,
-                                       "domain": domain,
-                                       "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-                                       "token": account_activation_token.make_token(user)
-                                   })
-        to_email = user.email
-        send_mail(mail_subject, message, recipient_list=[to_email],
-                  from_email=settings.EMAIL_HOST_USER)
-
     @swagger_auto_schema(
         request_body=RegistrationSerializer,
         request_method='POST',
@@ -129,7 +123,7 @@ class RegistrationView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         current_site = get_current_site(request)
-        self.send_mail(user.id, current_site)
+        send_activation_mail.delay(user.id, str(current_site))
 
         return Response(serializer.data)
 
