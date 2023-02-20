@@ -45,6 +45,8 @@ CELERY_IMPORTS = [
 ]
 
 
+TELEGRAMBOT_API_TOKEN = '*******'
+
 
 # Application definition
 

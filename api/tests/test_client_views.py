@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.test import TestCase
 from ..models import Category
+from ..views import CategoriesListView
 from django.urls import reverse
 
 
