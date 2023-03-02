@@ -194,7 +194,7 @@ class BasketView(APIView):
         input_serializer = AddProductsSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
 
-        product = get_object_or_404(ProductItem, id=input_serializer.data.get('product_id'))
+        product = ProductItem.objects.get(id=input_serializer.data.get('product_id'))
 
         if product.count_on_stock >= input_serializer.data.get('number_of_items'):
             object, created = Basket.objects.get_or_create(user=request.user, product=product)
@@ -228,7 +228,7 @@ class BasketView(APIView):
         input_serializer = DeleteProductSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
 
-        product = get_object_or_404(ProductItem, id=input_serializer.data.get('product_id'))
+        product = ProductItem.get(id=input_serializer.data.get('product_id'))
         Basket.objects.get(user=request.user, product=product).delete()
 
         return Response(status=200)

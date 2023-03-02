@@ -28,7 +28,7 @@ SECRET_KEY = '-=s@rd*9@tf5i)gd@)iz3p0gf8!xa22ajk0l#$sp1-2*&njidf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0']
 
 
 EMAIL_HOST = 'smtp.yandex.ru'
@@ -38,14 +38,25 @@ EMAIL_HOST_PASSWORD = "*****"
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 
-CELERY_BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_BROKER_URL = 'redis://redis:6379'
+CELERY_RESULT_BACKEND = 'redis://redis:6379'
 CELERY_IMPORTS = [
     "api.tasks"
 ]
 
 
 TELEGRAMBOT_API_TOKEN = '*******'
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'api_key': {
+            'type': 'apiKey',
+            'description': 'Personal API Key authorization',
+            'name': 'Authorization',
+            'in': 'header',
+        }
+    }
+}
 
 
 # Application definition
@@ -107,10 +118,10 @@ WSGI_APPLICATION = 'shop.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'shop_db_z79',
-        'USER': 'postgres',
-        'PASSWORD': '12345',
-        'HOST': '127.0.0.1',
+        'NAME': 'shop',
+        'USER': 'olga',
+        'PASSWORD': '',
+        'HOST': 'db',
         'PORT': '5432',
     }
 }
