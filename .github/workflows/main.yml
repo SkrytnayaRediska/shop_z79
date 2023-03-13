@@ -15,6 +15,19 @@ jobs:
       matrix:
         python-version: [ 3.9 ]
 
+    services:
+      db:
+        image: postgres:12.0-alpine
+        container_name: db
+        volumes:
+          - postgres_data:/app
+        environment:
+          - POSTGRES_USER=olga
+          - POSTGRES_PASSWORD=
+          - POSTGRES_DB=shop
+        ports:
+          - "5432:5432"
+
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -28,17 +41,10 @@ jobs:
     - name: Lint with Flake8
       run: |
         flake8 . --exit-zero
-    - name: Start PostgreSQL
-      run: docker-compose up -d db
-    - name: Wait for database
-      run: |
-        sleep 20
-    - name: View Postgres logs
-      run: docker logs db
+
+
     - name: Run Tests
       env:
         DB_HOST: db
       run: |
         python manage.py test
-    - name: Stop PostgreSQL
-      run: docker-compose down
