@@ -6,6 +6,18 @@ on:
   pull_request:
     branches: [ master ]
 
+services:
+  db:
+    image: postgres
+    env:
+      POSTGRES_USER: 'olga'
+      POSTGRES_PASSWORD: ''
+      POSTGRES_DB: 'shop'
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
 jobs:
   build:
 
@@ -33,3 +45,5 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+    - name: Stop PostgreSQL
+      run: docker-compose down
