@@ -33,6 +33,8 @@ jobs:
     - name: Wait for database
       run: |
         sleep 20
+    - name: View Postgres logs
+      run: docker logs db
     - name: Run Tests
       env:
         DB_HOST: db
