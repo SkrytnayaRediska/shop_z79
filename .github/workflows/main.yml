@@ -10,9 +10,9 @@ services:
   db:
     image: postgres
     env:
-      POSTGRES_USER: 'olga'
-      POSTGRES_PASSWORD: ''
-      POSTGRES_DB: 'shop'
+      POSTGRES_USER: "olga"
+      POSTGRES_PASSWORD: ""
+      POSTGRES_DB: "shop"
     ports:
       - "5432:5432"
     volumes:
