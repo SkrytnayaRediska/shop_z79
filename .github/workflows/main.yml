@@ -17,15 +17,17 @@ jobs:
 
     services:
       db:
-        image: postgres
-        env:
-          POSTGRES_USER: "olga"
-          POSTGRES_PASSWORD: ""
-          POSTGRES_DB: "shop"
+        image: postgres:12.0-alpine
+        volumes:
+          - postgres_data:/app
+        environment:
+          - POSTGRES_USER=olga
+          - POSTGRES_PASSWORD=
+          - POSTGRES_DB=shop
         ports:
           - "5432:5432"
-        volumes:
-          - db_data:/var/lib/postgresql/data
+      volumes:
+        postgres_data:
 
     steps:
     - uses: actions/checkout@v2
