@@ -6,18 +6,6 @@ on:
   pull_request:
     branches: [ master ]
 
-services:
-  db:
-    image: postgres
-    env:
-      POSTGRES_USER: "olga"
-      POSTGRES_PASSWORD: ""
-      POSTGRES_DB: "shop"
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
 jobs:
   build:
 
@@ -26,6 +14,18 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [ 3.9 ]
+
+    services:
+      db:
+        image: postgres
+        env:
+          POSTGRES_USER: "olga"
+          POSTGRES_PASSWORD: ""
+          POSTGRES_DB: "shop"
+        ports:
+          - "5432:5432"
+        volumes:
+          - db_data:/var/lib/postgresql/data
 
     steps:
     - uses: actions/checkout@v2
