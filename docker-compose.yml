@@ -24,8 +24,11 @@ services:
       - POSTGRES_DB=shop
     ports:
       - "5432:5432"
-    command:
-      postgres -c log_level=debug
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
   redis:
     image: redis:alpine
   celery:
