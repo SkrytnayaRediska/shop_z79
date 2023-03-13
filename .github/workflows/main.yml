@@ -18,7 +18,6 @@ jobs:
     services:
       db:
         image: postgres:12.0-alpine
-        container_name: db
         volumes:
           - postgres_data:/app
         environment:
