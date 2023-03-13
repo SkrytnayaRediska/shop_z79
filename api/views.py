@@ -23,6 +23,10 @@ from drf_yasg.utils import swagger_auto_schema
 from .tasks import send_activation_mail, get_products_statistic
 
 
+class TestClass:
+    pass
+
+
 class GetStatisticView(APIView):
     permission_classes = (AllowAny, )
 
