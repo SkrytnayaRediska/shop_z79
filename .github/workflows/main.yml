@@ -34,6 +34,8 @@ jobs:
       run: |
         sleep 20
     - name: Run Tests
+      env:
+        DB_HOST: db
       run: |
         python manage.py test
     - name: Stop PostgreSQL
