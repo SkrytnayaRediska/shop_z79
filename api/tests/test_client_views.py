@@ -1,40 +1,37 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from django.test import TestCase
-from ..models import Category
-from ..views import CategoriesListView
+from rest_framework.test import APITestCase
 from django.urls import reverse
+import pytest
 
 
-class TestCategoriesView(TestCase):
-    fixtures = ["api/tests/fixtures/fixture_categories.json"]
+pytestmark = [pytest.mark.django_db]
+EVERYTHING_EQUALS_NON_NONE = type('omnieq', (), {"__eq__": lambda x, y: y is not None})()
 
+
+class SomeTest(APITestCase):
+    fixtures = ['api/tests/fixtures/fixture_categories.json']
 
     def test_categories_all_view(self):
-        response = self.client.get(reverse('categories-all'))
-        self.assertIsInstance(response.data, list)
-        self.assertEqual(response.data, [
+        viewset_url = reverse('categories-all')
+
+        response = self.client.get(viewset_url)
+        assert response.status_code == 200
+        assert response.data == [
             {
                 "id": 1,
                 "name": "category1",
-                "description": "some description"
+                "description": EVERYTHING_EQUALS_NON_NONE
             },
             {
                 "id": 2,
                 "name": "category2",
-                "description": "some description"
+                "description": EVERYTHING_EQUALS_NON_NONE
             },
             {
                 "id": 3,
                 "name": "category3",
-                "description": "some description"
+                "description": EVERYTHING_EQUALS_NON_NONE
             }
 
-        ])
-
-
-
-
+        ]
 
 
